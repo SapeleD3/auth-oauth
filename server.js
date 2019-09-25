@@ -33,7 +33,7 @@ app.use((req, res, next) => {
 app.get('/', (req, res) => {
     res.status(200).send('HELLO WORLD')
 });
-// app.get('/user', userRoutes)
+app.use('/user', userRoutes)
 
 //Error Handlers
 app.use((error, req, res, next) => {
