@@ -2,23 +2,35 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const userSchema = Schema({
-    _id: mongoose.Schema.Types.ObjectId,
-    googleID: {
-        type: String
-    },
-    email: {
+    method: {
         type: String,
-        required: true,
-        unique: true,
-        match: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-    },
-    name: {
-        type: String,
+        enum: ['local', 'google'],
         required: true
     },
-    password: {
-        type: String,
-        required: true
+    local: {
+        _id: mongoose.Schema.Types.ObjectId,
+        email: {
+            type: String,
+            lowercase: true
+        },
+        name: {
+            type: String,
+        },
+        password: {
+            type: String,
+        }
+    },
+    google: {
+        id: {
+            type: String
+        },
+        email: {
+            type: String,
+            lowercase: true
+        },
+        name: {
+            type: String
+        }
     }
 
 })

@@ -1,7 +1,7 @@
 {
     "env": {
         "MONGO_URI": "mongodb+srv://MoSalaH:1234@cluster0-6sbfo.mongodb.net/story-teller?retryWrites=true&w=majority",
-        "JWT_KEY": "secret",
+        "": "secret",
         "PORT": 6536
     }
 }

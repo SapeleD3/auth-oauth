@@ -23,7 +23,7 @@ exports.getUsers = (req, res) => {
 
 exports.getUserByid = (req, res) => {
     const id = req.params.id
-    User.findById({ _id: id })
+    User.findById({ "local._id": id })
         .exec()
         .then(user => {
             res.status(200).json({
@@ -40,7 +40,7 @@ exports.getUserByid = (req, res) => {
 
 exports.deleteUserById = (req, res) => {
     const id = req.params.id
-    User.findByIdAndRemove({ _id: id })
+    User.findByIdAndRemove({ "local._id": id })
         .exec()
         .then(resp => {
             res.status(200).json({
@@ -57,7 +57,7 @@ exports.deleteUserById = (req, res) => {
 
 exports.registerUser = (req, res) => {
     User.find({
-        email: req.body.email
+        "local.email": req.body.email
     })
         .exec()
         .then(user => {
@@ -70,17 +70,30 @@ exports.registerUser = (req, res) => {
                     bcrypt.hash(req.body.password, salt, (err, hash) => {
                         if (err) throw err;
                         const user = new User({
-                            _id: new mongoose.Types.ObjectId(),
-                            googleID: req.body.googleID,
-                            email: req.body.email,
-                            name: req.body.name,
-                            password: hash
+                            method: 'local',
+                            local: {
+                                _id: new mongoose.Types.ObjectId(),
+                                email: req.body.email,
+                                name: req.body.name,
+                                password: hash
+                            }
+
                         });
                         user.save()
                             .then(resp => {
+                                const token = jwt.sign({
+                                    email: resp.email,
+                                    userId: resp._id
+                                },
+                                    'Slugterra5',
+                                    {
+                                        expiresIn: new Date().setDate(new Date().getDate() + 1)
+                                    }
+                                );
                                 res.status(201).json({
                                     message: 'user created successfully',
-                                    response: resp
+                                    response: resp,
+                                    token
                                 })
                                     .catch(err => {
                                         res.status(500).json({
@@ -95,7 +108,7 @@ exports.registerUser = (req, res) => {
 }
 
 exports.loginUsers = (req, res) => {
-    User.find({ email: req.body.email })
+    User.find({ "local.email": req.body.email })
         .exec()
         .then(user => {
             if (user.length < 1) {
@@ -116,7 +129,7 @@ exports.loginUsers = (req, res) => {
                     },
                         'Slugterra5',
                         {
-                            expiresIn: "1h"
+                            expiresIn: new Date().setDate(new Date().getDate() + 1)
                         }
                     );
                     return res.status(401).json({
@@ -134,4 +147,19 @@ exports.loginUsers = (req, res) => {
                 error: err
             })
         })
+}
+
+exports.googleOauth = (req, res) => {
+    const token = jwt.sign({
+        email: req.user.google.email,
+        userId: req.user.google.id
+    },
+        'Slugterra5',
+        {
+            expiresIn: new Date().setDate(new Date().getDate() + 1)
+        }
+    );
+    res.status(200).json({
+        token
+    })
 }
